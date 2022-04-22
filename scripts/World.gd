@@ -92,7 +92,7 @@ func _process(_delta):
 var on_chunk = 0
 func _on_viewer_moved(mover):
 	var pos = mover.global_transform.origin
-	scanner.global_transform.origin.x = pos.x + 40
+	scanner.global_transform.origin.x = pos.x + 25
 	var celloff : int = map.world_to_map(Vector3(pos.x, 0, pos.z)).x
 	# warning-ignore:integer_division
 	var curr_chunk : int = celloff / chunk_length
