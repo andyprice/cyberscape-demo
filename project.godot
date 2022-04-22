@@ -13,10 +13,6 @@ config_version=4
 config/name="CyberScape"
 run/main_scene="res://scenes/World.tscn"
 
-[debug]
-
-settings/fps/force_fps=30
-
 [display]
 
 window/size/width=1280
@@ -77,6 +73,7 @@ quit={
 [physics]
 
 common/enable_pause_aware_picking=true
+3d/active_soft_world=false
 
 [rendering]
 
