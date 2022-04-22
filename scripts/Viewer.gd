@@ -8,7 +8,7 @@ onready var init_transform = transform
 onready var init_hgimbal_transform = hgimbal.transform
 onready var init_vgimbal_transform = vgimbal.transform
 
-const SPEED = 2.0
+const SPEED = 5.0
 
 signal viewer_moved(player)
 
