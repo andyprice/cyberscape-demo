@@ -2,11 +2,27 @@ extends GridMap
 
 onready var cube_shader = preload("res://shaders/cube.gdshader")
 onready var cube_texture = preload("res://textures/cube.png")
+onready var bad_texture = preload("res://textures/red.png")
+
+# Mesh sizes
+var big = Vector3(4.0, 12.0, 4.0)
+var mid = Vector3(4.0, 6.0, 4.0)
+var lil = Vector3(4.0, 1.0, 4.0)
 
 func set_block(x, z, type):
 	if type == null:
 		self.set_cell_item(x, 0, z, 0)
 	self.set_cell_item(x, 0, z, type)
+
+func set_bad_block(x, z):
+	var item = self.get_cell_item(x, 0, z)
+	var name = self.mesh_library.get_item_name(item)
+	if name.begins_with("Large"):
+		self.set_cell_item(x, 0, z, 50)
+	elif name.begins_with("Medium"):
+		self.set_cell_item(x, 0, z, 51)
+	elif name.begins_with("Small"):
+		self.set_cell_item(x, 0, z, 52)
 
 func remove_block(x, z):
 	self.set_cell_item(x, 0, z, INVALID_CELL_ITEM)
@@ -17,7 +33,10 @@ func create_mesh(meshlib: MeshLibrary, n: int, name: String, size: Vector3, colo
 	# small/large cubes of given colours here.
 	var material = ShaderMaterial.new()
 	material.shader = cube_shader
-	material.set_shader_param("cube_texture", cube_texture)
+	if n >= 50:
+		material.set_shader_param("cube_texture", bad_texture)
+	else:
+		material.set_shader_param("cube_texture", cube_texture)
 	material.set_shader_param("colour", colour)
 	var cube = CubeMesh.new()
 	cube.size = size
@@ -37,10 +56,9 @@ var palette = [
 		Color(0.690, 0.345, 0.776, 1.0)
 ]
 
+var badblock_colour = Color(1.0, 0.0, 0.0, 1.0)
+
 func _ready():
-	var big = Vector3(4.0, 12.0, 4.0)
-	var mid = Vector3(4.0, 6.0, 4.0)
-	var lil = Vector3(4.0, 1.0, 4.0)
 	var ml = MeshLibrary.new()
 	create_mesh(ml,  0, "SmallColour0",    lil, palette[0])
 	create_mesh(ml,  1, "SmallColour1",    lil, palette[1])
@@ -57,6 +75,9 @@ func _ready():
 	create_mesh(ml, 12, "LargeColour2",    big, palette[2])
 	create_mesh(ml, 13, "LargeColour3",    big, palette[3])
 	create_mesh(ml, 14, "LargeColour4",    big, palette[4])
+	create_mesh(ml, 50, "LargeBad",        big, badblock_colour)
+	create_mesh(ml, 51, "MediumBad",       mid, badblock_colour)
+	create_mesh(ml, 52, "SmallBad",        lil, badblock_colour)
 	# Add more...
 	# create_mesh(ml, 10, "Thing",      lil, Color(1.0, 0.5, 0.3, 1.0))
 	self.mesh_library = ml

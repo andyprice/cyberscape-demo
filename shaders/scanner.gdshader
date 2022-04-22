@@ -12,5 +12,5 @@ void vertex() {
 void fragment() {
 	ALBEDO = colour.rgb;
 	EMISSION = colour.rgb * 1.75;
-	ALPHA = sin(TIME * 2.0 - (vpos.y * 0.5)) * 0.75 + 0.3;
+	ALPHA = sin(TIME * 2.0 - (vpos.y * 10.0)) * 0.2 + 0.3;
 }

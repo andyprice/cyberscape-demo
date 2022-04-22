@@ -7,8 +7,8 @@ onready var scanner = $Scanner
 onready var chunk_proto = preload("res://scenes/Chunk.tscn")
 
 const chunk_length : int = 8
-const chunk_width : int = 50
-const chunk_io_unit : int = 50
+const chunk_width : int = 30
+const chunk_io_unit : int = 30
 const chunk_size = chunk_length * chunk_width
 const chunk_dist : int = 15 # Num of chunks to load before and after viewer pos
 const io_usecs_limit = 2000 # microseconds
@@ -32,8 +32,20 @@ func unload_chunk(i):
 			map.remove_block(chunk_xoffset + x, z)
 
 var chunk_reader
+var block_skips = []
+var block_skip_idx = 0
+var row_skips = []
+var row_skip_idx = 0
+const ROW_SKIP_LEN = 128
+const BLOCK_SKIP_LEN = 100
 
 func _ready():
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	for i in BLOCK_SKIP_LEN:
+		block_skips.append(rng.randi_range(0, chunk_width - 1))
+	for i in ROW_SKIP_LEN:
+		row_skips.append(rng.randi_range(0, 4))
 	# Start coroutine
 	chunk_reader = read_chunks()
 	yield(get_tree().create_timer(0.1), "timeout")
@@ -89,11 +101,36 @@ func _on_chunk_invalid(chunk):
 func _process(_delta):
 	chunk_reader = chunk_reader.resume()
 
+var last_scanoff = 0
+var rows_skipped = 0
+
+func scan_blocks(start):
+	# Are we interested in this row?
+	if rows_skipped != row_skips[row_skip_idx]:
+		rows_skipped += 1
+		return
+
+	row_skip_idx += 1
+	if row_skip_idx == ROW_SKIP_LEN:
+			row_skip_idx = 0
+	rows_skipped = 0
+
+	# Choose a block to fail the scan
+	map.set_bad_block(start, block_skips[block_skip_idx])
+	block_skip_idx += 1
+	if block_skip_idx == BLOCK_SKIP_LEN:
+		block_skip_idx = 0
+
+const SCANNER_DIST = 30
 var on_chunk = 0
 func _on_viewer_moved(mover):
 	var pos = mover.global_transform.origin
-	scanner.global_transform.origin.x = pos.x + 25
+	scanner.global_transform.origin.x = pos.x + SCANNER_DIST
 	var celloff : int = map.world_to_map(Vector3(pos.x, 0, pos.z)).x
+	var scanoff : int = map.world_to_map(Vector3(pos.x + SCANNER_DIST, 0, pos.z)).x
+	if scanoff != last_scanoff:
+		scan_blocks(scanoff)
+		last_scanoff = scanoff
 	# warning-ignore:integer_division
 	var curr_chunk : int = celloff / chunk_length
 	if curr_chunk < 0:
