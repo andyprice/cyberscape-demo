@@ -10,7 +10,7 @@ const chunk_length : int = 8
 const chunk_width : int = 50
 const chunk_io_unit : int = 50
 const chunk_size = chunk_length * chunk_width
-const chunk_dist : int = 25 # Num of chunks to load before and after viewer pos
+const chunk_dist : int = 15 # Num of chunks to load before and after viewer pos
 const io_usecs_limit = 2000 # microseconds
 
 var go = false
